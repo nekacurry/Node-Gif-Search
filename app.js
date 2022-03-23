@@ -1,5 +1,7 @@
 const express = require('express');
 const { engine } = require('express-handlebars');
+const fetch = require('node-fetch');
+require('dotenv').config();
 
 const app = express();
 app.engine('handlebars', engine());
@@ -8,7 +10,18 @@ app.set("views", "./views");
 
 app.get('/', 
   (req, res) => {
-    res.render('home');
+    let term = "";
+    if (req.query.term) {
+      term = req.query.term
+    }
+    fetch(`https://g.tenor.com/v1/search?q=${term}&key=${process.env.API_KEY}&limit=10`)
+    .then(response => response.json())
+    .then(
+      (data) => {
+        const gifs = data.results;
+        res.render('home', { gifs });
+      }
+    );
   }
 );
 
